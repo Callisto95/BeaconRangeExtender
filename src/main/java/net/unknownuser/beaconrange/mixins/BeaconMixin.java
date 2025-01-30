@@ -15,13 +15,15 @@ import java.util.*;
 
 @Mixin(BeaconBlockEntity.class)
 public class BeaconMixin {
+	private BeaconMixin() {}
+
 	@Inject(at = @At("HEAD"), method = "applyPlayerEffects", cancellable = true)
 	private static void applyPlayerEffects(World world, BlockPos pos, int beaconLevel, RegistryEntry<StatusEffect> primaryEffect, RegistryEntry<StatusEffect> secondaryEffect, CallbackInfo ci) {
 		// replace method entirely
 		ci.cancel();
 		
 		if (!world.isClient && primaryEffect != null) {
-			double range           = (beaconLevel * Config.rangePerLevel()) + Config.baseOffset();
+			double range           = (double) (beaconLevel * Config.rangePerLevel()) + Config.baseOffset();
 			int    effectAmplifier = 0;
 			if (beaconLevel >= 4 && Objects.equals(primaryEffect, secondaryEffect)) {
 				effectAmplifier = 1;
