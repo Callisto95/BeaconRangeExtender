@@ -18,7 +18,7 @@ public class BeaconMixin {
 	private BeaconMixin() {}
 
 	@Inject(at = @At("HEAD"), method = "applyPlayerEffects", cancellable = true)
-	private static void applyPlayerEffects(World world, BlockPos pos, int beaconLevel, RegistryEntry<StatusEffect> primaryEffect, RegistryEntry<StatusEffect> secondaryEffect, CallbackInfo ci) {
+	private static void applyPlayerEffects(World world, BlockPos pos, int beaconLevel, StatusEffect primaryEffect, StatusEffect secondaryEffect, CallbackInfo ci) {
 		// replace method entirely
 		ci.cancel();
 		
