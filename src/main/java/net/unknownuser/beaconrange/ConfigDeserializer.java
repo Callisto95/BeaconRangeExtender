@@ -28,7 +28,7 @@ public class ConfigDeserializer implements JsonDeserializer<Config> {
 		
 		for (Map.Entry<String, JsonElement> element : rawMultipliers.entrySet()) {
 			try {
-				Identifier identifier = Identifier.of(element.getKey());
+				Identifier identifier = Identifier.splitOn(element.getKey(), ':');
 				double     multiplier = element.getValue().getAsDouble();
 				multipliers.put(identifier, multiplier);
 			} catch (InvalidIdentifierException exc) {
