@@ -21,8 +21,8 @@ public class Config implements Serializable {
 		}
 		
 		private static void initializeMultiplierTable() {
-			RANGE_EXTENDER_MULTIPLIER.put(Identifier.of("minecraft", "diamond_block"), 2.0);
-			RANGE_EXTENDER_MULTIPLIER.put(Identifier.of("minecraft", "netherite_block"), 4.0);
+			RANGE_EXTENDER_MULTIPLIER.put(Identifier.splitOn("minecraft:diamond_block", ':'), 2.0);
+			RANGE_EXTENDER_MULTIPLIER.put(Identifier.splitOn("minecraft:netherite_block", ':'), 4.0);
 		}
 		
 		private static Config defaultConfig() {
