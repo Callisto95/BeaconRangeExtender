@@ -4,6 +4,16 @@
 
 A Minecraft Fabric mod, which extends the range of beacons.
 
-## Toggling
+## Configuration
 
-Within the config directory is the config file `beacon-range-extender.json`.
+Within the `config` directory, there is `beacon-range-extender.json`.
+
+It has the following options:
+
+- `rangePerLevel`: the base range each level provides
+- `baseRange`: the range the beacon gives as long as it's activated
+- `rangeMultipliers`: if a level is made of only one material, the range can (and by default will) be multiplied by the provided value.
+  - By default, diamond blocks double the range and netherite blocks x4 it.
+  - This is given as `[block identifier]: [multiplier]`
+
+Note: The range is calculated with `(level * rangePerLevel * rangeMultiplier) + baseRange` (adapted from vanilla: `(level * 10) + 10`)
