@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version "1.11-SNAPSHOT"
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 }
@@ -97,7 +97,7 @@ modrinth {
 	projectId = "AaBVswQ1"
 	versionNumber = "${project.mod_version}"
 	uploadFile = remapJar
-	gameVersions = ['1.20.5', '1.20.6', '1.21', '1.21.1', '1.21.2', '1.21.3', '1.21.4']
+	gameVersions = ['1.20.5', '1.20.6', '1.21', '1.21.1', '1.21.2', '1.21.3', '1.21.4', '1.21.5', '1.21.6']
 	loaders = ['fabric']
 	dependencies = [
 	        new ModDependency('P7dR8mSH', 'required')
