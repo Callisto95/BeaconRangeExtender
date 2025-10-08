@@ -38,7 +38,7 @@ public class BeaconMixin {
 		// replace method entirely
 		ci.cancel();
 		
-		if (!world.isClient && primaryEffect != null) {
+		if (!world.isClient() && primaryEffect != null) {
 			double range           = (beaconLevel * Config.rangePerLevel() * baseBlockFactor) + Config.baseOffset(); // CHANGES MADE HERE
 			int    effectAmplifier = 0;
 			
