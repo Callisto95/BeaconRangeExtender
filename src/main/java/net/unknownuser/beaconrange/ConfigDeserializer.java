@@ -2,9 +2,7 @@ package net.unknownuser.beaconrange;
 
 import com.google.gson.*;
 import com.google.gson.stream.*;
-import net.minecraft.core.registries.*;
-import net.minecraft.resources.*;
-import net.minecraft.world.level.block.*;
+import net.minecraft.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -26,10 +24,10 @@ public class ConfigDeserializer extends TypeAdapter<Config> {
 			.name("rangeMultipliers")
 			.beginObject();
 		
-		for (Map.Entry<Block, Double> entry : value.rangeMultipliers.entrySet()) {
-			Block  block      = entry.getKey();
-			Double multiplier = entry.getValue();
-			writer.name(BuiltInRegistries.BLOCK.getKey(block).toString()).value(multiplier);
+		for (Map.Entry<Identifier, Double> entry : value.rangeMultipliers.entrySet()) {
+			Identifier identifier = entry.getKey();
+			Double     multiplier = entry.getValue();
+			writer.name(identifier.toString()).value(multiplier);
 		}
 		
 		writer.endObject().endObject();
@@ -39,7 +37,7 @@ public class ConfigDeserializer extends TypeAdapter<Config> {
 	public Config read(JsonReader reader) throws IOException {
 		int                rangePerLevel    = Config.Defaults.RANGE_PER_LEVEL_MULTIPLIER;
 		int                baseRange        = Config.Defaults.MINIMUM_RANGE;
-		Map<Block, Double> rangeMultipliers = new HashMap<>();
+		Map<Identifier, Double> rangeMultipliers = new HashMap<>();
 		
 		reader.beginObject();
 		
@@ -56,9 +54,7 @@ public class ConfigDeserializer extends TypeAdapter<Config> {
 						String blockID    = reader.nextName();
 						double multiplier = reader.nextDouble();
 						
-						Block block = BuiltInRegistries.BLOCK.get(Identifier.parse(blockID)).orElseThrow().value();
-						
-						rangeMultipliers.put(block, multiplier);
+						rangeMultipliers.put(Identifier.splitOn(blockID, Identifier.NAMESPACE_SEPARATOR), multiplier);
 					}
 					
 					reader.endObject();
