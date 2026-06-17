@@ -50,7 +50,7 @@ tasks.processResources {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release = 25
+    options.release = 21
 }
 
 kotlin {
@@ -65,8 +65,8 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.jar {
@@ -101,12 +101,22 @@ modrinth {
     versionNumber.set(property("mod_version") as String)
     versionType.set("release")
     uploadFile.set(tasks.jar)
-	syncBodyFrom = rootProject.file("README.md").readText()
+    syncBodyFrom = rootProject.file("README.md").readText()
 
-	gameVersions.addAll(
+    gameVersions.addAll(
         listOf(
-            "26.1",
-            "26.2",
+            "1.21",
+            "1.21.1",
+            "1.21.2",
+            "1.21.3",
+            "1.21.4",
+            "1.21.5",
+            "1.21.6",
+            "1.21.7",
+            "1.21.8",
+            "1.21.9",
+            "1.21.10",
+            "1.21.11"
         )
     )
 
