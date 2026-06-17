@@ -1,13 +1,13 @@
 package net.unknownuser.beaconrange.mixins;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.*;
-import net.minecraft.registry.*;
-import net.minecraft.registry.tag.*;
-import net.minecraft.util.*;
-import net.minecraft.util.math.*;
-import net.minecraft.world.*;
+import com.llamalad7.mixinextras.sugar.*;
+import net.minecraft.core.*;
+import net.minecraft.tags.*;
+import net.minecraft.world.effect.*;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.state.*;
 import net.unknownuser.beaconrange.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
@@ -19,62 +19,62 @@ public class BeaconMixin {
 	
 	@Unique
 	private static double baseBlockFactor = 1;
-
-	@ModifyVariable(method = "applyPlayerEffects", at = @At("STORE"))
-	private static double applyNewBeaconRange(double range, @Local(argsOnly = true) int beaconLevel) {
-		return (beaconLevel * Config.rangePerLevel() * baseBlockFactor) + Config.baseOffset();
+	
+	@ModifyVariable(method = "applyEffects", at = @At("STORE"), name = "range")
+	private static double applyNewBeaconRange(double range, final Level level, final BlockPos worldPosition, final int levels, final Holder<MobEffect> primaryPower, final Holder<MobEffect> secondaryPower) {
+		return (levels * Config.rangePerLevel() * baseBlockFactor) + Config.baseOffset();
 	}
 	
-	@Inject(at = @At("HEAD"), method = "updateLevel", cancellable = true)
-	private static void updateLevel(World world, int x, int y, int z, CallbackInfoReturnable<Integer> cir) { // NOSONAR
+	@Inject(at = @At("HEAD"), method = "updateBase", cancellable = true)
+	private static void updateLevel(Level level, int x, int y, int z, CallbackInfoReturnable<Integer> cir) { // NOSONAR
 		// same with above, this method is copied a lot, however there are more changes
 		
 		// replace entire method
 		cir.cancel();
 		
-		int i = 0;
+		int currentDepth = 0;
 		
 		double multiplier = 1;
 		
-		for (int j = 1; j <= 4; i = j++) { // NOSONAR
-			int k = y - j;
-			if (k < world.getBottomY()) {
+		for (int depth = 1; depth <= 4; currentDepth = depth++) { // NOSONAR
+			int k = y - depth;
+			if (k < level.getMinY()) {
 				break;
 			}
 			
-			boolean bl = true;
+			boolean isOK = true;
 			
-			boolean    levelIsOnlySameBlock = true;
-			Identifier identifier           = null;
+			boolean levelIsOnlySameBlock = true;
+			Block   block                = null;
 			
-			for (int l = x - j; l <= x + j && bl; ++l) {
-				for (int m = z - j; m <= z + j; ++m) {
-					BlockState blockState = world.getBlockState(new BlockPos(l, k, m));
+			for (int l = x - depth; l <= x + depth && isOK; ++l) {
+				for (int m = z - depth; m <= z + depth; ++m) {
+					BlockState blockState = level.getBlockState(new BlockPos(l, k, m));
 					
-					if (!blockState.isIn(BlockTags.BEACON_BASE_BLOCKS)) {
-						bl = false;
+					if (!blockState.is(BlockTags.BEACON_BASE_BLOCKS)) {
+						isOK = false;
 						break;
 					}
 					
-					if (identifier == null) {
-						identifier = Registries.BLOCK.getId(blockState.getBlock());
-					} else if (levelIsOnlySameBlock && !identifier.equals(Registries.BLOCK.getId(blockState.getBlock()))) {
+					if (block == null) {
+						block = blockState.getBlock();
+					} else if (levelIsOnlySameBlock && block != blockState.getBlock()) {
 						levelIsOnlySameBlock = false;
 					}
 				}
 			}
 			
 			if (levelIsOnlySameBlock) {
-				multiplier *= Config.blockMultiplier(identifier);
+				multiplier *= Config.blockMultiplier(block);
 			}
 			
-			if (!bl) {
+			if (!isOK) {
 				break;
 			}
 		}
 		
 		baseBlockFactor = multiplier;
 		
-		cir.setReturnValue(i);
+		cir.setReturnValue(currentDepth);
 	}
 }

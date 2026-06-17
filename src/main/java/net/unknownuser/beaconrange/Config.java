@@ -3,7 +3,7 @@ package net.unknownuser.beaconrange;
 import com.google.gson.*;
 import com.google.gson.annotations.*;
 import net.fabricmc.loader.api.*;
-import net.minecraft.util.*;
+import net.minecraft.world.level.block.*;
 
 import java.io.*;
 import java.util.*;
@@ -12,17 +12,17 @@ public class Config implements Serializable {
 	public static class Defaults {
 		private Defaults() {}
 		
-		static final int                     RANGE_PER_LEVEL_MULTIPLIER = 10;
-		static final int                     MINIMUM_RANGE              = 10;
-		static final Map<Identifier, Double> RANGE_EXTENDER_MULTIPLIER  = new HashMap<>();
+		static final int                RANGE_PER_LEVEL_MULTIPLIER = 10;
+		static final int                MINIMUM_RANGE              = 10;
+		static final Map<Block, Double> RANGE_EXTENDER_MULTIPLIER  = new HashMap<>();
 		
 		static {
 			initializeMultiplierTable();
 		}
 		
 		private static void initializeMultiplierTable() {
-			RANGE_EXTENDER_MULTIPLIER.put(Identifier.splitOn("minecraft:diamond_block", ':'), 2.0);
-			RANGE_EXTENDER_MULTIPLIER.put(Identifier.splitOn("minecraft:netherite_block", ':'), 4.0);
+			RANGE_EXTENDER_MULTIPLIER.put(Blocks.DIAMOND_BLOCK, 2.0);
+			RANGE_EXTENDER_MULTIPLIER.put(Blocks.NETHERITE_BLOCK, 4.0);
 		}
 		
 		private static Config defaultConfig() {
@@ -30,27 +30,28 @@ public class Config implements Serializable {
 		}
 	}
 	
-	public static final File   CONFIG_FILE = FabricLoader.getInstance()
+	public static final File CONFIG_FILE = FabricLoader.getInstance()
 		.getConfigDir()
 		.resolve("beacon-range-extender.json")
 		.toFile();
-	private static      Config instance    = null;
 	
-	public Config(int rangePerLevel, int baseRange, Map<Identifier, Double> rangeMultipliers) {
+	private static Config instance = null;
+	
+	public Config(int rangePerLevel, int baseRange, Map<Block, Double> rangeMultipliers) {
 		this.rangePerLevel    = rangePerLevel;
 		this.baseRange        = baseRange;
 		this.rangeMultipliers = rangeMultipliers;
 	}
 	
 	@Expose
-	protected final   int                     rangePerLevel;
+	protected final   int                rangePerLevel;
 	@Expose
-	protected final   int                     baseRange;
+	protected final   int                baseRange;
 	@Expose
-	protected final   Map<Identifier, Double> rangeMultipliers; // NOSONAR
+	protected final   Map<Block, Double> rangeMultipliers; // NOSONAR
 	// Gson *will* write all fields, even when enabling ignoreNonExposed
 	// use transient to even skip the inclusion
-	private transient boolean                 hasError = false;
+	private transient boolean            hasError = false;
 	
 	public void enableError() {
 		hasError = true;
@@ -64,8 +65,8 @@ public class Config implements Serializable {
 		return instance.baseRange;
 	}
 	
-	public static double blockMultiplier(Identifier identifier) {
-		return instance.rangeMultipliers.getOrDefault(identifier, 1.0);
+	public static double blockMultiplier(Block block) {
+		return instance.rangeMultipliers.getOrDefault(block, 1.0);
 	}
 	
 	private static Config getConfigFromFile() {
@@ -83,11 +84,16 @@ public class Config implements Serializable {
 		return cfg;
 	}
 	
-	private static Config loadConfig() {
-		Gson gson = new GsonBuilder().registerTypeAdapter(Config.class, new ConfigDeserializer())
+	private static Gson initializeGson() {
+		return new GsonBuilder().registerTypeAdapter(Config.class, new ConfigDeserializer())
 			.excludeFieldsWithoutExposeAnnotation()
 			.setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
 			.create();
+	}
+	
+	private static Config loadConfig() {
+		Gson gson = initializeGson();
+		
 		try (FileReader reader = new FileReader(CONFIG_FILE)) {
 			Config config = gson.fromJson(reader, Config.class);
 			
@@ -118,7 +124,8 @@ public class Config implements Serializable {
 	}
 	
 	public void write() {
-		Gson gson = new Gson().newBuilder().setPrettyPrinting().create();
+		Gson gson = initializeGson();
+		
 		try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
 			gson.toJson(this, writer);
 		} catch (IOException e) {
