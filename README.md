@@ -16,4 +16,4 @@ It has the following options:
   - By default, diamond blocks double the range and netherite blocks x4 it.
   - This is given as `[block identifier]: [multiplier]`
 
-Note: The range is calculated with `(level * rangePerLevel * rangeMultiplier) + baseRange` (adapted from vanilla: `(level * 10) + 10`)
+Note: The range is calculated as `(level * rangePerLevel * rangeMultiplier) + baseRange`.
