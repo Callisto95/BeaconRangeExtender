@@ -101,11 +101,13 @@ modrinth {
     versionNumber.set(property("mod_version") as String)
     versionType.set("release")
     uploadFile.set(tasks.jar)
-	syncBodyFrom = rootProject.file("README.md").readText()
+    syncBodyFrom = rootProject.file("README.md").readText()
 
-	gameVersions.addAll(
+    gameVersions.addAll(
         listOf(
             "26.1",
+            "26.1.1",
+            "26.1.2",
             "26.2",
         )
     )
