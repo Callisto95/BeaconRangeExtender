@@ -49,13 +49,6 @@ public class Config implements Serializable {
 	protected final   int                baseRange;
 	@Expose
 	protected final   Map<Block, Double> rangeMultipliers; // NOSONAR
-	// Gson *will* write all fields, even when enabling ignoreNonExposed
-	// use transient to even skip the inclusion
-	private transient boolean            hasError = false;
-	
-	public void enableError() {
-		hasError = true;
-	}
 	
 	public static int rangePerLevel() {
 		return instance.rangePerLevel;
@@ -97,10 +90,7 @@ public class Config implements Serializable {
 		try (FileReader reader = new FileReader(CONFIG_FILE)) {
 			Config config = gson.fromJson(reader, Config.class);
 			
-			if (config.hasError) {
-				BeaconRange.LOGGER.warn("config has errors, rewriting config file");
-				config.write();
-			}
+			config.write();
 			
 			return config;
 		} catch (IOException e) {
