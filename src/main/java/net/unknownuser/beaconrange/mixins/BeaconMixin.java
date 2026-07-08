@@ -35,7 +35,8 @@ public abstract class BeaconMixin extends BlockEntity {
 		@Nullable RegistryEntry<StatusEffect> primaryEffect,
 		@Nullable RegistryEntry<StatusEffect> secondaryEffect
 	) {
-		return (beaconLevel * Config.rangePerLevel() * dimensionMapping.getOrDefault(world, new HashMap<>()).getOrDefault(pos, 1.0)) + Config.baseOffset();
+		return (beaconLevel * Config.rangePerLevel() * dimensionMapping.getOrDefault(world, new HashMap<>())
+			.getOrDefault(pos, 1.0)) + Config.baseOffset();
 	}
 	
 	@Inject(at = @At("HEAD"), method = "updateLevel", cancellable = true)
@@ -90,5 +91,15 @@ public abstract class BeaconMixin extends BlockEntity {
 			.put(new BlockPos(x, y, z), multiplier);
 		
 		cir.setReturnValue(i);
+	}
+	
+	@Inject(at = @At("HEAD"), method = "markRemoved")
+	protected void markRemoved(CallbackInfo ci) {
+		dimensionMapping.computeIfPresent(
+			this.world, (irrelevantDimension, multiplierMapping) -> {
+				multiplierMapping.remove(this.pos);
+				return multiplierMapping.isEmpty() ? null : multiplierMapping;
+			}
+		);
 	}
 }
