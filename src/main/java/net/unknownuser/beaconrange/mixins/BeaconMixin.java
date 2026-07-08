@@ -22,11 +22,19 @@ public abstract class BeaconMixin extends BlockEntity {
 	}
 	
 	@Unique
-	private static final Map<BlockPos, Double> rangeMultipliers = new HashMap<>();
+	private static final Map<Level, Map<BlockPos, Double>> dimensionMapping = new HashMap<>();
 	
 	@ModifyVariable(method = "applyEffects", at = @At("STORE"), name = "range")
-	private static double applyNewBeaconRange(double range, final Level level, final BlockPos worldPosition, final int levels, final Holder<MobEffect> primaryPower, final Holder<MobEffect> secondaryPower) {
-		return (levels * Config.rangePerLevel() * rangeMultipliers.getOrDefault(worldPosition, 1.0)) + Config.baseOffset();
+	private static double applyNewBeaconRange(
+		double range,
+		final Level level,
+		final BlockPos worldPosition,
+		final int levels,
+		final Holder<MobEffect> primaryPower,
+		final Holder<MobEffect> secondaryPower
+	) {
+		return (levels * Config.rangePerLevel() * dimensionMapping.getOrDefault(level, new HashMap<>())
+			.getOrDefault(worldPosition, 1.0)) + Config.baseOffset();
 	}
 	
 	@Inject(at = @At("HEAD"), method = "updateBase", cancellable = true)
@@ -75,13 +83,18 @@ public abstract class BeaconMixin extends BlockEntity {
 			}
 		}
 		
-		rangeMultipliers.put(new BlockPos(x,y,z), multiplier);
+		dimensionMapping.computeIfAbsent(level, _ -> new HashMap<>()).put(new BlockPos(x, y, z), multiplier);
 		
 		cir.setReturnValue(currentDepth);
 	}
 	
 	@Inject(at = @At("HEAD"), method = "setRemoved")
 	private void setRemoved(CallbackInfo ci) {
-		rangeMultipliers.remove(this.worldPosition);
+		dimensionMapping.computeIfPresent(
+			level, (_, multiplierMapping) -> {
+				multiplierMapping.remove(this.worldPosition);
+				return multiplierMapping.isEmpty() ? null : multiplierMapping;
+			}
+		);
 	}
 }
