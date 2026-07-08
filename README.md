@@ -15,5 +15,6 @@ It has the following options:
 - `rangeMultipliers`: if a level is made of only one material, the range can (and by default will) be multiplied by the provided value.
   - By default, diamond blocks double the range and netherite blocks x4 it.
   - This is given as `[block identifier]: [multiplier]`
+  - The value is multiplicative. Two layers 4 times their value create a range of 16 times their value, not 8 times.
 
-Note: The range is calculated with `(level * rangePerLevel * rangeMultiplier) + baseRange` (adapted from vanilla: `(level * 10) + 10`)
+Note: The range is calculated as `(level * rangePerLevel * rangeMultiplier) + baseRange`.

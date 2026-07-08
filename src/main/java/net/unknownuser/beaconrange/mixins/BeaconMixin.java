@@ -1,28 +1,41 @@
 package net.unknownuser.beaconrange.mixins;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.*;
+import net.minecraft.entity.effect.*;
 import net.minecraft.registry.*;
+import net.minecraft.registry.entry.*;
 import net.minecraft.registry.tag.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.*;
 import net.unknownuser.beaconrange.*;
+import org.jspecify.annotations.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 
+import java.util.*;
+
 @Mixin(BeaconBlockEntity.class)
-public class BeaconMixin {
-	private BeaconMixin() {}
+public abstract class BeaconMixin extends BlockEntity {
+	protected BeaconMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
+	}
 	
 	@Unique
-	private static double baseBlockFactor = 1;
-
+	private static final Map<World, Map<BlockPos, Double>> dimensionMapping = new HashMap<>();
+	
 	@ModifyVariable(method = "applyPlayerEffects", at = @At("STORE"))
-	private static double applyNewBeaconRange(double range, @Local(argsOnly = true) int beaconLevel) {
-		return (beaconLevel * Config.rangePerLevel() * baseBlockFactor) + Config.baseOffset();
+	private static double applyNewBeaconRange(
+		double range,
+		World world,
+		BlockPos pos,
+		int beaconLevel,
+		@Nullable RegistryEntry<StatusEffect> primaryEffect,
+		@Nullable RegistryEntry<StatusEffect> secondaryEffect
+	) {
+		return (beaconLevel * Config.rangePerLevel() * dimensionMapping.getOrDefault(world, new HashMap<>()).getOrDefault(pos, 1.0)) + Config.baseOffset();
 	}
 	
 	@Inject(at = @At("HEAD"), method = "updateLevel", cancellable = true)
@@ -73,7 +86,8 @@ public class BeaconMixin {
 			}
 		}
 		
-		baseBlockFactor = multiplier;
+		dimensionMapping.computeIfAbsent(world, irrelevantWorld -> new HashMap<>())
+			.put(new BlockPos(x, y, z), multiplier);
 		
 		cir.setReturnValue(i);
 	}
