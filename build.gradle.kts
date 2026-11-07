@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("net.fabricmc.fabric-loom")
     id("maven-publish")
-    id("org.jetbrains.kotlin.jvm") version "2.4.0"
+    id("org.jetbrains.kotlin.jvm") version "2.4.21"
     id("com.modrinth.minotaur") version "2.+"
 }
 
@@ -109,6 +109,7 @@ modrinth {
             "26.1.1",
             "26.1.2",
             "26.2",
+            "26.3",
         )
     )
 
